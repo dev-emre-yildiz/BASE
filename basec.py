@@ -36,6 +36,7 @@ GOTO_TOKEN = 50
 EQUALS_TO = 51
 GREATER = 52
 LESS = 53
+PRINT = 54
 
 
 lexeme = ""
@@ -130,6 +131,8 @@ def lex(char):
             nextToken = DIV_OP
         elif (lexeme == "EQ"):
             nextToken = EQUALS_TO
+        elif (lexeme == "PRINT"):
+            nextToken = PRINT
         else:
             nextToken = IDENT
 
@@ -160,7 +163,6 @@ def match_set_code(program, i):
     match program[i]:
         case ((20, _), (25, _), (11, x), (48, _), (10, y), (26, _)):
             globals()[x] = int(y)
-            print(globals()[x])
 
 
 def match_int_code(program, i):
@@ -178,6 +180,16 @@ def match_add_code(program, i):
     match program[i]:
         case ((21, _), (25, _), (11, x), (48, _), (11, y), (26, _)):
             globals()[x] = globals()[x] + globals()[y]
+        case ((21, _), (11, x), (48, _), (10, y)):
+            globals()[x] = globals()[x] + int(y)
+
+
+def match_print_code(program, i):
+    match program[i]:
+        case ((54, _), (11, x)):
+            print(globals()[x])
+        case ((54, _), (25, _), (21, _), (25, _), (11, x), (48, _), (11, y), (26, _), (26, _)):
+            print(globals()[x] + globals()[y])
 
 
 def match_operator(program, i):
@@ -188,8 +200,8 @@ def match_operator(program, i):
             match_set_code(program, i)
         case 21:
             match_add_code(program, i)
-        case ('DIV', x, y):
-            return int(x) / int(y)
+        case 54:
+            match_print_code(program, i)
         case _:
             raise TypeError("not a operator we support")
 
@@ -240,30 +252,12 @@ def main():
             break
         nextChar = getNonBlank()
 
-    print(lexemes)
-    print(tokens)
-
-    print(len(lexemes))
-    print(len(tokens))
-    # print(merge(tokens, lexemes))
-    print(merge(tokens, lexemes))
     getLines_addAnother(lexemes, ';', lexemes_lines)
-    print(lexemes_lines)
-
     getLines_addAnother(tokens, SEMI_COLON, tokens_lines)
-    print(tokens_lines)
     program = merge_lists_toTuple(tokens_lines, lexemes_lines)
-    print(program)
-    print(program[0][0][0])
-    print(program[0][1][0])
-    match_operator(program, 0)
-    match_operator(program, 1)
-    match_operator(program, 2)
-    match_operator(program, 3)
-    match_operator(program, 4)
-    print(apple)
-    print(banana)
-    print(carrot)
+
+    for i in range(len(program)):
+        match_operator(program, i)
 
 
 main()
