@@ -113,11 +113,12 @@ def lex(char):
             nextChar = getChar()
 
         # Check for keywords
+
         if (lexeme == "IF"):
             nextToken = IF_TOKEN
-        if (lexeme == "THEN"):
+        elif (lexeme == "THEN"):
             nextToken = THEN_TOKEN
-        if (lexeme == "SET"):
+        elif (lexeme == "SET"):
             nextToken = ASSIGN_OP
         elif (lexeme == "integer"):
             nextToken = INT_LIT
@@ -137,6 +138,10 @@ def lex(char):
             nextToken = DIV_OP
         elif (lexeme == "EQ"):
             nextToken = EQUALS_TO
+        elif (lexeme == "GRE"):
+            nextToken = GREATER
+        elif (lexeme == "LESS"):
+            nextToken = LESS
         elif (lexeme == "PRINT"):
             nextToken = PRINT
         else:
@@ -241,6 +246,27 @@ def match_add_code(program, i):
             globals()[x] = globals()[x] / int(y)
 
 
+def match_if_code(program, i):
+    match program[i][:5]:
+        case ((41, _), (11, x), (_, _), (11, y), (42, _)):
+            def fun():
+                num = 5 - len(program[i])
+                a_list = []
+                a_list.append(program[i][num:])
+                match_operator(a_list, 0)
+
+            match program[i][2][0]:
+                case 51:
+                    if(globals()[x] == globals()[y]):
+                        fun()
+                case 52:
+                    if(globals()[x] > globals()[y]):
+                        fun()
+                case 53:
+                    if(globals()[x] < globals()[y]):
+                        fun()
+
+
 def match_print_code(program, i):
     match program[i]:
         case ((54, _), (11, x)):
@@ -269,13 +295,15 @@ def match_operator(program, i):
             match_print_code(program, i)
         case 12:
             match_string_code(program, i)
+        case 41:
+            match_if_code(program, i)
         case _:
-            raise TypeError("not a operator we support")
+            pass  # raise TypeError("not a operator we support")
 
-#   for line in lines:
-#     line = re.split(', | ', lines[count])
-#     count += 1
-#     print(match_operator(line))
+            #   for line in lines:
+            #     line = re.split(', | ', lines[count])
+            #     count += 1
+            #     print(match_operator(line))
 
 
 def merge(list1, list2):
