@@ -10,3 +10,6 @@ PRINT apple;
 PRINT (ADD (apple, banana));
 PRINT (SUB (carrot, banana));
 PRINT (MULT (kalde, apple));
+PRINT 'HelloWorld';
+string word, 'kelime';
+PRINT word;
