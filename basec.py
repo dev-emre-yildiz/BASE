@@ -20,6 +20,7 @@ UNKNOWN = 99
 # Token codes
 INT_LIT = 10
 IDENT = 11
+STRING = 12
 ASSIGN_OP = 20
 ADD_OP = 21
 SUB_OP = 22
@@ -37,6 +38,7 @@ EQUALS_TO = 51
 GREATER = 52
 LESS = 53
 PRINT = 54
+SINGLE_QUOTE = 55
 
 
 lexeme = ""
@@ -62,6 +64,8 @@ def lookupSymbol(character):
         nextToken = COMMA
     elif (character == ";"):
         nextToken = SEMI_COLON
+    elif (character == "'"):
+        nextToken = SINGLE_QUOTE
     else:
         nextToken = INVALID
 
@@ -119,6 +123,8 @@ def lex(char):
             nextToken = INT_LIT
         elif (lexeme == "float"):
             nextToken = FLOAT_TOKEN
+        elif (lexeme == "string"):
+            nextToken = STRING
         elif (lexeme == "GOTO"):
             nextToken = GOTO_TOKEN
         elif (lexeme == "ADD"):
@@ -201,6 +207,16 @@ def match_int_code(program, i):
             globals()[x] = int(y)
 
 
+def match_string_code(program, i):
+    match program[i]:
+        case ((12, _), (11, x)):
+            globals()[x] = ''
+        case ((12, _), (11, x), (48, _), (55, _), (11, y), (55, _)):
+            globals()[x] = str(y)
+        case ((12, _), (25, _), (11, x), (48, _), (55, _), (10, y), (55, _), (26, _)):
+            globals()[x] = str(y)
+
+
 def match_add_code(program, i):
     match program[i]:
         case ((21, _), (25, _), (10, x), (48, _), (10, y), (26, _)):
@@ -229,6 +245,8 @@ def match_print_code(program, i):
     match program[i]:
         case ((54, _), (11, x)):
             print(globals()[x])
+        case ((54, _), (55, _), (11, x), (55, _)):
+            print(str(x))
         case ((54, _), (25, _), (21, _), (25, _), (11, x), (48, _), (11, y), (26, _), (26, _)):
             print(globals()[x] + globals()[y])
         case ((54, _), (25, _), (22, _), (25, _), (11, x), (48, _), (11, y), (26, _), (26, _)):
@@ -249,6 +267,8 @@ def match_operator(program, i):
             match_add_code(program, i)
         case 54:
             match_print_code(program, i)
+        case 12:
+            match_string_code(program, i)
         case _:
             raise TypeError("not a operator we support")
 
