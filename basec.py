@@ -33,12 +33,14 @@ THEN_TOKEN = 42
 FLOAT_TOKEN = 46
 COMMA = 48
 SEMI_COLON = 49
-GOTO_TOKEN = 50
+COLON = 50
 EQUALS_TO = 51
 GREATER = 52
 LESS = 53
 PRINT = 54
 SINGLE_QUOTE = 55
+GOTO_TOKEN = 56
+MOD_OP = 57
 
 
 lexeme = ""
@@ -64,6 +66,8 @@ def lookupSymbol(character):
         nextToken = COMMA
     elif (character == ";"):
         nextToken = SEMI_COLON
+    elif (character == ":"):
+        nextToken = COLON
     elif (character == "'"):
         nextToken = SINGLE_QUOTE
     else:
@@ -136,6 +140,8 @@ def lex(char):
             nextToken = MULT_OP
         elif (lexeme == "DIV"):
             nextToken = DIV_OP
+        elif (lexeme == "MOD"):
+            nextToken = MOD_OP
         elif (lexeme == "EQ"):
             nextToken = EQUALS_TO
         elif (lexeme == "GRE"):
@@ -247,24 +253,41 @@ def match_add_code(program, i):
 
 
 def match_if_code(program, i):
-    match program[i][:5]:
-        case ((41, _), (11, x), (_, _), (11, y), (42, _)):
-            def fun():
-                num = 5 - len(program[i])
-                a_list = []
-                a_list.append(program[i][num:])
-                match_operator(a_list, 0)
+    if(program[i][-2][0] == 56):
+        match program[i]:
+            case ((41, _), (11, x), (_, _), (11, y), (42, _), (56, _), (11, z)):
+                match program[i][2][0]:
+                    case 51:
+                        if(globals()[x] == globals()[y]):
+                            match_goto_code(program, i)
+                    case 52:
+                        if(globals()[x] > globals()[y]):
+                            match_goto_code(program, i)
+                    case 53:
+                        if(globals()[x] < globals()[y]):
+                            match_goto_code(program, i)
+    elif (program[i][2][0] == 57):
+        match_mod_code(program, i)
 
-            match program[i][2][0]:
-                case 51:
-                    if(globals()[x] == globals()[y]):
-                        fun()
-                case 52:
-                    if(globals()[x] > globals()[y]):
-                        fun()
-                case 53:
-                    if(globals()[x] < globals()[y]):
-                        fun()
+    else:
+        match program[i][:5]:
+            case ((41, _), (11, x), (_, _), (11, y), (42, _)):
+                def fun():
+                    num = 5 - len(program[i])
+                    a_list = []
+                    a_list.append(program[i][num:])
+                    match_operator(a_list, 0)
+
+                match program[i][2][0]:
+                    case 51:
+                        if(globals()[x] == globals()[y]):
+                            fun()
+                    case 52:
+                        if(globals()[x] > globals()[y]):
+                            fun()
+                    case 53:
+                        if(globals()[x] < globals()[y]):
+                            fun()
 
 
 def match_print_code(program, i):
@@ -283,10 +306,34 @@ def match_print_code(program, i):
             print(globals()[x] / globals()[y])
 
 
+def match_goto_pos(program, i):
+    globals()[program[i][0][1]] = i
+
+
+def match_goto_code(program, i):
+    match program[i]:
+        case ((56, _), (11, _)):
+            for index in range(globals()[program[i][1][1]], i):
+                print(index+1)
+                match_operator(program, index)
+        case (_, _, _, _, _, (56, _), (11, x)):
+            for index in range(globals()[x], i+1):
+                match_operator(program, index)
+
+
+def match_mod_code(program, i):
+    match program[i]:
+        case((41, _), (11, x), (57, _), (11, y), (51, _), (11, z), (42, _), (54, _), (11, k)):
+            if((globals()[x] % globals()[y]) == globals()[z]):
+                print(globals()[k])
+
+
 def match_operator(program, i):
     match program[i][0][0]:
         case 10:
             match_int_code(program, i)
+        case 11:
+            match_goto_pos(program, i)
         case 20:
             match_set_code(program, i)
         case 21:
@@ -297,13 +344,10 @@ def match_operator(program, i):
             match_string_code(program, i)
         case 41:
             match_if_code(program, i)
+        case 56:
+            match_goto_code(program, i)
         case _:
-            pass  # raise TypeError("not a operator we support")
-
-            #   for line in lines:
-            #     line = re.split(', | ', lines[count])
-            #     count += 1
-            #     print(match_operator(line))
+            raise TypeError("not a operator we support")
 
 
 def merge(list1, list2):
@@ -349,10 +393,9 @@ def main():
 
     getLines_addAnother(lexemes, ';', lexemes_lines)
     getLines_addAnother(tokens, SEMI_COLON, tokens_lines)
-    program = merge_lists_toTuple(tokens_lines, lexemes_lines)
-
-    for i in range(len(program)):
-        match_operator(program, i)
+    main_list = merge_lists_toTuple(tokens_lines, lexemes_lines)
+    for i in range(len(main_list)):
+        match_operator(main_list, i)
 
 
 main()
