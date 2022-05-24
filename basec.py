@@ -163,6 +163,32 @@ def match_set_code(program, i):
     match program[i]:
         case ((20, _), (25, _), (11, x), (48, _), (10, y), (26, _)):
             globals()[x] = int(y)
+        case ((20, _), (25, _), (11, x), (48, _), (11, y), (26, _)):
+            globals()[x] = globals()[y]
+        case ((20, _), (11, x), (25, _), (21, _), (10, y), (48, _), (10, z), (26, _)):
+            globals()[x] = int(y) + int(z)
+        case ((20, _), (11, x), (25, _), (22, _), (10, y), (48, _), (10, z), (26, _)):
+            globals()[x] = int(y) - int(z)
+        case ((20, _), (11, x), (25, _), (23, _), (10, y), (48, _), (10, z), (26, _)):
+            globals()[x] = int(y) * int(z)
+        case ((20, _), (11, x), (25, _), (24, _), (10, y), (48, _), (10, z), (26, _)):
+            globals()[x] = int(y) / int(z)
+        case ((20, _), (11, x), (25, _), (21, _), (11, y), (48, _), (11, z), (26, _)):
+            globals()[x] = globals()[y] + globals()[z]
+        case ((20, _), (11, x), (25, _), (21, _), (11, y), (48, _), (10, z), (26, _)):
+            globals()[x] = globals()[y] + int(z)
+        case ((20, _), (11, x), (25, _), (22, _), (11, y), (48, _), (11, z), (26, _)):
+            globals()[x] = globals()[y] - globals()[z]
+        case ((20, _), (11, x), (25, _), (22, _), (11, y), (48, _), (10, z), (26, _)):
+            globals()[x] = globals()[y] - int(z)
+        case ((20, _), (11, x), (25, _), (23, _), (11, y), (48, _), (11, z), (26, _)):
+            globals()[x] = globals()[y] * globals()[z]
+        case ((20, _), (11, x), (25, _), (23, _), (11, y), (48, _), (10, z), (26, _)):
+            globals()[x] = globals()[y] * int(z)
+        case ((20, _), (11, x), (25, _), (24, _), (11, y), (48, _), (11, z), (26, _)):
+            globals()[x] = globals()[y] / globals()[z]
+        case ((20, _), (11, x), (25, _), (24, _), (11, y), (48, _), (10, z), (26, _)):
+            globals()[x] = globals()[y] / int(z)
 
 
 def match_int_code(program, i):
@@ -171,17 +197,32 @@ def match_int_code(program, i):
             globals()[x] = 0
         case ((10, _), (11, x), (48, _), (10, y)):
             globals()[x] = int(y)
-
         case ((10, _), (25, _), (11, x), (48, _), (10, y), (26, _)):
             globals()[x] = int(y)
 
 
 def match_add_code(program, i):
     match program[i]:
+        case ((21, _), (25, _), (10, x), (48, _), (10, y), (26, _)):
+            int(x) + int(y)
+        case ((21, _), (25, _), (11, x), (48, _), (10, y), (26, _)):
+            globals()[x] = globals()[x] + int(y)
         case ((21, _), (25, _), (11, x), (48, _), (11, y), (26, _)):
             globals()[x] = globals()[x] + globals()[y]
         case ((21, _), (11, x), (48, _), (10, y)):
             globals()[x] = globals()[x] + int(y)
+        case ((22, _), (25, _), (11, x), (48, _), (11, y), (26, _)):
+            globals()[x] = globals()[x] - globals()[y]
+        case ((22, _), (11, x), (48, _), (10, y)):
+            globals()[x] = globals()[x] - int(y)
+        case ((23, _), (25, _), (11, x), (48, _), (11, y), (26, _)):
+            globals()[x] = globals()[x] * globals()[y]
+        case ((23, _), (11, x), (48, _), (10, y)):
+            globals()[x] = globals()[x] * int(y)
+        case ((24, _), (25, _), (11, x), (48, _), (11, y), (26, _)):
+            globals()[x] = globals()[x] / globals()[y]
+        case ((24, _), (11, x), (48, _), (10, y)):
+            globals()[x] = globals()[x] / int(y)
 
 
 def match_print_code(program, i):
@@ -190,6 +231,12 @@ def match_print_code(program, i):
             print(globals()[x])
         case ((54, _), (25, _), (21, _), (25, _), (11, x), (48, _), (11, y), (26, _), (26, _)):
             print(globals()[x] + globals()[y])
+        case ((54, _), (25, _), (22, _), (25, _), (11, x), (48, _), (11, y), (26, _), (26, _)):
+            print(globals()[x] - globals()[y])
+        case ((54, _), (25, _), (23, _), (25, _), (11, x), (48, _), (11, y), (26, _), (26, _)):
+            print(globals()[x] * globals()[y])
+        case ((54, _), (25, _), (24, _), (25, _), (11, x), (48, _), (11, y), (26, _), (26, _)):
+            print(globals()[x] / globals()[y])
 
 
 def match_operator(program, i):
