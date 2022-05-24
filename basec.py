@@ -40,6 +40,7 @@ LESS = 53
 PRINT = 54
 SINGLE_QUOTE = 55
 GOTO_TOKEN = 56
+MOD_OP = 57
 
 
 lexeme = ""
@@ -139,6 +140,8 @@ def lex(char):
             nextToken = MULT_OP
         elif (lexeme == "DIV"):
             nextToken = DIV_OP
+        elif (lexeme == "MOD"):
+            nextToken = MOD_OP
         elif (lexeme == "EQ"):
             nextToken = EQUALS_TO
         elif (lexeme == "GRE"):
@@ -263,6 +266,8 @@ def match_if_code(program, i):
                     case 53:
                         if(globals()[x] < globals()[y]):
                             match_goto_code(program, i)
+    elif (program[i][2][0] == 57):
+        match_mod_code(program, i)
 
     else:
         match program[i][:5]:
@@ -316,6 +321,13 @@ def match_goto_code(program, i):
                 match_operator(program, index)
 
 
+def match_mod_code(program, i):
+    match program[i]:
+        case((41, _), (11, x), (57, _), (11, y), (51, _), (11, z), (42, _), (54, _), (11, k)):
+            if((globals()[x] % globals()[y]) == globals()[z]):
+                print(globals()[k])
+
+
 def match_operator(program, i):
     match program[i][0][0]:
         case 10:
@@ -336,11 +348,6 @@ def match_operator(program, i):
             match_goto_code(program, i)
         case _:
             raise TypeError("not a operator we support")
-
-            #   for line in lines:
-            #     line = re.split(', | ', lines[count])
-            #     count += 1
-            #     print(match_operator(line))
 
 
 def merge(list1, list2):
