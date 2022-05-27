@@ -1,5 +1,5 @@
 integer number, 0;
-integer finall, 100;
+integer finall, 20;
 LOOP;
 ADD (number, 1);
 PRINT number;
